@@ -62,6 +62,7 @@
 #include "WaypointManager.h"
 #include "GMTicketMgr.h"
 #include "Util.h"
+#include "Language.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -2223,4 +2224,17 @@ void World::LoadDBVersion()
 
     if(m_CreatureEventAIVersion.empty())
         m_CreatureEventAIVersion = "Unknown creature EventAI.";
+}
+
+void World::SendPvPAnnounce(Player* killer, Player* killed)
+{
+	std::ostringstream msg;
+	std::ostringstream KillerName;
+	std::ostringstream KilledName;
+
+	KillerName << killer->GetName();
+	KilledName << killed->GetName();
+
+	msg << "[" << KillerName.str().c_str() << "]" << " just made a corpse out of " << "[" << KilledName.str().c_str() << "]" << " in " << "[" << killer->GetBaseMap()->GetMapName() << "]";
+	SendWorldText(LANG_SYSTEMMESSAGE, msg.str().c_str());
 }

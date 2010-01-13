@@ -579,6 +579,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             player->RewardPlayerAndGroupAtKill(pVictim);
             player->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
+			
+			//PK Announce System
+			if (pVictim->GetTypeId() == TYPEID_PLAYER)
+           {
+	         sWorld.SendPvPAnnounce(player, ((Player*)pVictim));
+           }
 
 			// PvP Token
 			int8 leveldiff = player->getLevel() - pVictim->getLevel();
