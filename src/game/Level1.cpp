@@ -125,12 +125,14 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
 // global announce
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
+
    int32 strid = 0;
    
     if(!*args)
         return false;
 
     switch(m_session->GetSecurity()) {
+
 	case SEC_MODERATOR:
 	  strid = LANG_SYSTEMMESSAGE_MODERATOR;
 	  break;
