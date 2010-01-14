@@ -816,6 +816,8 @@ enum MangosStrings
     LANG_TAXINODE_ENTRY_LIST_CONSOLE    = 1129,
     LANG_EVENT_STARTED                  = 1130,
     LANG_EVENT_STOPPED                  = 1131,
+	LANG_BAN_WORLD_ANNOUNCE             = 1132,
+    LANG_PERMBAN_WORLD_ANNOUNCE         = 1133,
     // Room for more level 3              1132-1199 not used
 
     // Debug commands
