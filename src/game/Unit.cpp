@@ -585,12 +585,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
            {
 	         sWorld.SendPvPAnnounce(player, ((Player*)pVictim));
            }
-
-			// PvP Token
-			int8 leveldiff = player->getLevel() - pVictim->getLevel();
-			if(!pVictim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT) && leveldiff < 10)
-			player->ReceiveToken();
-			
+	
             WorldPacket data(SMSG_PARTYKILLLOG, (8+8)); //send event PARTY_KILL
             data << uint64(player->GetGUID()); //player with killing blow
             data << uint64(pVictim->GetGUID()); //victim
