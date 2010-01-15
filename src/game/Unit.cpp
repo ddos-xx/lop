@@ -7598,6 +7598,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
             break;
         }
+		// Glyph of death's Embrace
+        case 58679:
+        {
+            // Proc only from healing part of Death Coil. Check is essential as all Death Coil spells have 0x2000 mask in SpellFamilyFlags
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && procSpell->SpellFamilyFlags == UI64LIT(0x80002000)))
+                return false;
+            break;
+        }
         // Enlightenment (trigger only from mana cost spells)
         case 35095:
         {
