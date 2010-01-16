@@ -659,8 +659,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
             SendPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
 
-            guild->DisplayGuildBankTabsInfo(this);
-
             data.Initialize(SMSG_GUILD_EVENT, (5+10));      // we guess size
             data << uint8(GE_SIGNED_ON);
             data << uint8(1);
@@ -668,6 +666,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
             data << pCurrChar->GetGUID();
             guild->BroadcastPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-signed-on (SMSG_GUILD_EVENT)" );
+
+            // Increment online members of the guild
+            guild->IncOnlineMemberCount();
         }
         else
         {
@@ -751,7 +752,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
 
     // Set FFA PvP for non GM in non-rest mode
     if(sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING) )
-        pCurrChar->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+        pCurrChar->SetFFAPvP(true);
 
     if(pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
         pCurrChar->SetContestedPvP();
