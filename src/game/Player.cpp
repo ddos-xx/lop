@@ -4510,9 +4510,9 @@ void Player::DurabilityPointsLoss(Item* item, int32 points)
     int32 pOldDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
     int32 pNewDurability = pOldDurability - points;
 
-    if (pNewDurability < 0)
-        pNewDurability = 0;
-    else if (pNewDurability > pMaxDurability)
+    if (pNewDurability < 1)
+        pNewDurability = 1;
+    if (pNewDurability > pMaxDurability)
         pNewDurability = pMaxDurability;
 
     if (pOldDurability != pNewDurability)
@@ -18479,7 +18479,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         if(i == slot)
             continue;
         Item *pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if(pItem2 && pItem2->GetProto()->Socket[0].Color)
+        if(pItem2 && !pItem2->IsBroken() && pItem2->GetProto()->Socket[0].Color)
         {
             for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
             {
