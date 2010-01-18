@@ -4197,9 +4197,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetTargetGUID(0);
-        // probably wrong (this add skinnable flag)
-        // TODO: find correct flag
-        //m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         //Save last orientation
         if( m_target->getVictim() )
@@ -4251,9 +4248,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             return;
 
         m_target->clearUnitState(UNIT_STAT_ROOT);
-        // probably wrong (this add skinnable flag)
-        // TODO: find correct flag
-        //m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         if(!m_target->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_ON_VEHICLE))      // prevent allow move if have also stun effect
         {
@@ -4796,15 +4790,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 break;
             }
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            Unit* caster = GetCaster();
-
-            // Explosive Shot
-            if (apply && !loading && caster)
-                m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 14 / 100);
-            break;
-        }
     }
 
     m_isPeriodic = apply;
@@ -5011,13 +4996,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             }
             case SPELLFAMILY_HUNTER:
             {
-                // Serpent Sting
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-                {
-                    // $RAP*0.2/5 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.2 / 5);
-                    return;
-                }
                 // Immolation Trap
                 if ((m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004)) && m_spellProto->SpellIconID == 678)
                 {
@@ -7743,7 +7721,7 @@ void Aura::PeriodicDummyTick()
                 // Killing Spree
                 case 51690:
                 {
-                    if (m_target->hasUnitState(UNIT_STAT_STUNNED) || m_target->HasAuraType(SPELL_AURA_MOD_FEAR))
+                    if (m_target->hasUnitState(UNIT_STAT_STUNNED) || m_target->isFeared())
                         return;
 
                     std::list<Unit*> targets;

@@ -618,16 +618,11 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2f);
                 }
-                // Arcane Shot
-                else if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000800)) && m_spellInfo->maxLevel > 0)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15f);
-                }
                 // Steady Shot
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x100000000))
                 {
                     int32 base = irand((int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MINDAMAGE),(int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MAXDAMAGE));
-                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.1f);
+                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800);
                 }
                 // Explosive Trap Effect
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000004))
@@ -1622,7 +1617,7 @@ void Spell::EffectDummy(uint32 i)
 
                 //Any effect which causes you to lose control of your character will supress the starfall effect.
                 //and Starfall should not remove stealth 
-                if (m_caster->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_FLEEING | UNIT_STAT_ROOT | UNIT_STAT_CONFUSED) || unitTarget->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                if (m_caster->hasUnitState(UNIT_STAT_NO_FREE_MOVE) || unitTarget->HasAuraType(SPELL_AURA_MOD_STEALTH))
                     return;
 
                 switch(m_spellInfo->Id)
@@ -3182,15 +3177,8 @@ void Spell::EffectEnergisePct(uint32 i)
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
 {
-    Player* player = (Player*)m_caster;
-    if (!player)
-        return;
-
     if (gameObjTarget)
     {
-        if (Script->GOHello(player, gameObjTarget))
-            return;
-
         switch (gameObjTarget->GetGoType())
         {
             case GAMEOBJECT_TYPE_DOOR:
@@ -3202,25 +3190,21 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
-                // TODO: possible must be moved to loot release (in different from linked triggering)
-                if (gameObjTarget->GetGOInfo()->chest.eventId)
-                {
-                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId,gameObjTarget->GetDBTableGUIDLow());
-                    player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
-                }
-
-                // triggering linked GO
-                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
-                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
-
+                gameObjTarget->Use(m_caster);
                 // Don't return, let loots been taken
-            default:
                 break;
+
+            default:
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry());
+                return;
         }
     }
 
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     // Send loot
-    player->SendLoot(guid, loottype);
+    ((Player*)m_caster)->SendLoot(guid, loottype);
 }
 
 void Spell::EffectOpenLock(uint32 effIndex)
@@ -3635,8 +3619,7 @@ void Spell::EffectSummon(uint32 i)
 
     spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
     
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        spawnCreature->UpdateWalkModeForPets(((Player*)m_caster)->HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
+    spawnCreature->UpdateWalkMode(m_caster);
 
     spawnCreature->AIM_Initialize();
     spawnCreature->InitPetCreateSpells();
@@ -3815,7 +3798,7 @@ void Spell::EffectDistract(uint32 /*i*/)
         return;
 
     // target must be OK to do this
-    if( unitTarget->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNNED | UNIT_STAT_FLEEING ) )
+    if( unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT) )
         return;
 
     float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
@@ -4557,8 +4540,7 @@ void Spell::EffectSummonPet(uint32 i)
     NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        NewSummon->UpdateWalkModeForPets(((Player*)m_caster)->HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
+    NewSummon->UpdateWalkMode(m_caster);
 
     NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
     // this enables pet details window (Shift+P)
@@ -6068,7 +6050,7 @@ void Spell::EffectActivateObject(uint32 effect_idx)
 
     static ScriptInfo activateCommand = generateActivateCommand();
 
-    int32 delay_secs = m_spellInfo->EffectMiscValue[effect_idx];
+    int32 delay_secs = m_spellInfo->CalculateSimpleValue(effect_idx);
 
     gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
 }
