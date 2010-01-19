@@ -9065,6 +9065,9 @@ uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, 
             *no_space_count = count;
         return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
     }
+	
+    if (pItem && pItem->m_lootGenerated)
+        return EQUIP_ERR_ALREADY_LOOTED;
 
     // no maximum
     if(pProto->MaxCount <= 0)
@@ -11998,6 +12001,8 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
     if (!item)
         return;
 
+    if (!CanUseAttackType(Player::GetAttackBySlot(item->GetSlot()))
+        return;
     if (slot >= MAX_ENCHANTMENT_SLOT)
         return;
 
