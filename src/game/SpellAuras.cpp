@@ -4996,6 +4996,13 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             }
             case SPELLFAMILY_HUNTER:
             {
+                // Black Arrow
+                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0800000000000080))
+                {
+                    // $RAP*0.1/5 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1 / 5);
+                    return;
+                }
                 // Immolation Trap
                 if ((m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004)) && m_spellProto->SpellIconID == 678)
                 {
