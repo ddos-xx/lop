@@ -1078,6 +1078,8 @@ void World::LoadConfigSettings(bool reload)
         sLog.outError("Visibility.Distance.InFlight can't be greater %f",MAX_VISIBILITY_DISTANCE-m_VisibleObjectGreyDistance);
         m_MaxVisibleDistanceInFlight = MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance;
     }
+	
+	SetThreadMovement(sConfig.GetBoolDefault("MovementThread", false));
 
     ///- Read the "Data" directory from the config file
     std::string dataPath = sConfig.GetStringDefault("DataDir","./");
@@ -1537,7 +1539,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: World initialized" );
 
        // On lance le thread pour les movements    
-       if(sConfig.GetBoolDefault("MovementThread", false))
+       if(GetThreadMovement())
        {
                ACE_Based::Thread movement_thread(new MovementRunnable);
                movement_thread.setPriority(ACE_Based::Lowest);

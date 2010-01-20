@@ -137,8 +137,8 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 {  
        OpcodeHandler& opHandle = opcodeTable[new_packet->GetOpcode()];
    // Opcode de movements
-  if(sConfig.GetBoolDefault("MovementThread", false) && opHandle.handler == (&WorldSession::HandleMovementOpcodes))
-     sWorld.AddMovementOpcode(GetAccountId(), new_packet);
+  if(sWorld.GetThreadMovement() && opHandle.handler == (&WorldSession::HandleMovementOpcodes))
+    sWorld.AddMovementOpcode(GetAccountId(), new_packet);
   else
     _recvQueue.add(new_packet);
 }
@@ -164,7 +164,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 /*diff*/)
 {
-       ACE_Guard<ACE_Thread_Mutex>(mutex);
+       ACE_Guard<ACE_Thread_Mutex> guard(mutex);
 	   
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed

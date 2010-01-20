@@ -555,6 +555,8 @@ class World
                // Opcode movement thread
                void AddMovementOpcode(uint32 sessionid, WorldPacket* packet) { MovementOpcodeQueue.add(new MovementOpcode(sessionid, packet)); }
                void UpdateMovementOpcode();
+			   void SetThreadMovement(bool thread) { movementThread = thread; }
+			   bool GetThreadMovement() { return movementThread; }
 
     protected:
         void _UpdateGameTime();
@@ -621,6 +623,7 @@ class World
 
                // movement thread
                ACE_Based::LockedQueue<MovementOpcode *, ACE_Thread_Mutex> MovementOpcodeQueue;
+			   static bool movementThread;
 
         //used versions
         std::string m_DBVersion;
