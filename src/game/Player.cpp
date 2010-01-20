@@ -12001,8 +12001,6 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
     if (!item)
         return;
 
-    if (!CanUseAttackType(Player::GetAttackBySlot(item->GetSlot()))
-        return;
     if (slot >= MAX_ENCHANTMENT_SLOT)
         return;
 
