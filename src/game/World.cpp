@@ -1536,6 +1536,15 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "WORLD: World initialized" );
 
+       // On lance le thread pour les movements    
+       if(sConfig.GetBoolDefault("MovementThread", false))
+       {
+               ACE_Based::Thread movement_thread(new MovementRunnable);
+               movement_thread.setPriority(ACE_Based::Lowest);
+               sLog.outString( "MOVEMENT: Movement Thread start" );
+       }
+
+
     uint32 uStartInterval = getMSTimeDiff(uStartTime, getMSTime());
     sLog.outString( "SERVER STARTUP TIME: %i minutes %i seconds", uStartInterval / 60000, (uStartInterval % 60000) / 1000 );
 }
@@ -2075,10 +2084,54 @@ void World::UpdateSessions( uint32 diff )
         if(!itr->second->Update(diff))                      // As interval = 0
         {
             RemoveQueuedPlayer (itr->second);
-            delete itr->second;
-            m_sessions.erase(itr);
+                       WorldSession* deleteSession = itr->second;
+                       m_sessions.erase(itr);
+                       delete deleteSession;
         }
     }
+}
+
+// Thread pour les movements
+void MovementRunnable::run()
+{
+       while(!sWorld.IsStopped())
+       {
+               sWorld.UpdateMovementOpcode();
+               ACE_Based::Thread::Sleep(10);
+       }
+}
+
+// Update les movements
+void World::UpdateMovementOpcode()
+{
+       MovementOpcode* pMovement;
+       while (MovementOpcodeQueue.next(pMovement))
+       {
+               WorldSession* pSession = FindSession(pMovement->m_sessionid);
+               if(!pSession)
+               {
+                       delete pMovement->m_packet;
+                       delete pMovement;
+                       continue;
+               }
+
+               pSession->mutex.acquire();
+               // re-check, avoid delete pointer
+               if(!FindSession(pMovement->m_sessionid))
+               {
+                       delete pMovement->m_packet;
+                       delete pMovement;
+                       continue;
+               }
+
+               OpcodeHandler& opHandle = opcodeTable[pMovement->m_packet->GetOpcode()];
+               if(pSession->GetPlayer() && pSession->GetPlayer()->IsInWorld())
+                       (pSession->*opHandle.handler)(*pMovement->m_packet);
+
+               pSession->mutex.release();
+               delete pMovement->m_packet;
+               delete pMovement;
+       }
 }
 
 // This handles the issued and queued CLI commands

@@ -374,6 +374,25 @@ struct CliCommandHolder
     ~CliCommandHolder() { delete[] m_command; }
 };
 
+// Structure de stockage des opcodes mouvements.
+struct MovementOpcode
+{
+       uint32 m_sessionid;
+       WorldPacket* m_packet;
+
+       MovementOpcode(uint32 sessionid, WorldPacket* packet)
+               : m_sessionid(sessionid), m_packet(packet) {}
+
+       ~MovementOpcode() {}
+};
+
+// Thread pour la gestion des mouvements
+class MovementRunnable : public ACE_Based::Runnable
+{
+    public:
+        void run();
+};
+
 /// The World
 class World
 {
@@ -533,6 +552,10 @@ class World
         void SetScriptsVersion(char const* version) { m_ScriptsVersion = version ? version : "unknown scripting library"; }
         char const* GetScriptsVersion() { return m_ScriptsVersion.c_str(); }
 
+               // Opcode movement thread
+               void AddMovementOpcode(uint32 sessionid, WorldPacket* packet) { MovementOpcodeQueue.add(new MovementOpcode(sessionid, packet)); }
+               void UpdateMovementOpcode();
+
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -595,6 +618,9 @@ class World
         //sessions that are added async
         void AddSession_(WorldSession* s);
         ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
+
+               // movement thread
+               ACE_Based::LockedQueue<MovementOpcode *, ACE_Thread_Mutex> MovementOpcodeQueue;
 
         //used versions
         std::string m_DBVersion;

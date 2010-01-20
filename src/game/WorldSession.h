@@ -144,6 +144,7 @@ class MANGOS_DLL_SPEC WorldSession
         std::string const& GetRemoteAddress() { return m_Address; }
         void SetPlayer(Player *plr);
         uint8 Expansion() const { return m_expansion; }
+               ACE_Thread_Mutex mutex;
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }

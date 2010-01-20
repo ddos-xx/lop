@@ -36,6 +36,7 @@
 #include "MapManager.h"
 #include "SocialMgr.h"
 #include "zlib/zlib.h"
+#include "Config/ConfigEnv.h"
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
@@ -133,7 +134,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
-{
+{  
+       OpcodeHandler& opHandle = opcodeTable[new_packet->GetOpcode()];
+   // Opcode de movements
+  if(sConfig.GetBoolDefault("MovementThread", false) && opHandle.handler == (&WorldSession::HandleMovementOpcodes))
+     sWorld.AddMovementOpcode(GetAccountId(), new_packet);
+  else
     _recvQueue.add(new_packet);
 }
 
@@ -158,6 +164,7 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 /*diff*/)
 {
+       mutex.acquire();
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed
     WorldPacket* packet;
@@ -273,6 +280,8 @@ bool WorldSession::Update(uint32 /*diff*/)
     time_t currTime = time(NULL);
     if (!m_Socket || (ShouldLogOut(currTime) && !m_playerLoading))
         LogoutPlayer(true);
+
+       mutex.release();
 
     if (!m_Socket)
         return false;                                       //Will remove this session from the world session map
