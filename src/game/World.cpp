@@ -83,6 +83,7 @@ World::World()
 {
     m_playerLimit = 0;
     m_allowMovement = true;
+	movementThread = false;
     m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
     m_gameTime=time(NULL);

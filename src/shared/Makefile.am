@@ -35,6 +35,7 @@ libmangosshared_a_SOURCES = \
 	Common.h \
 	Errors.h \
 	LockedQueue.h \
+	LockedSet.h \
 	Log.cpp \
 	Log.h \
 	MemoryLeaks.cpp \

@@ -54,7 +54,7 @@ class UpdateData
     public:
         UpdateData();
 
-        void AddOutOfRangeGUID(std::set<uint64>& guids);
+        void AddOutOfRangeGUID(ACE_Based::LockedSet<uint64, ACE_Thread_Mutex>& guids);
         void AddOutOfRangeGUID(const uint64 &guid);
         void AddUpdateBlock(const ByteBuffer &block);
         bool BuildPacket(WorldPacket *packet);

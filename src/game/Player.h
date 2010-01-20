@@ -2233,7 +2233,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(),options); }
 
         // currently visible objects at player client
-        typedef std::set<uint64> ClientGUIDs;
+        typedef ACE_Based::LockedSet<uint64, ACE_Thread_Mutex> ClientGUIDs;
         ClientGUIDs m_clientGUIDs;
 
         bool HaveAtClient(WorldObject const* u) { return u==this || m_clientGUIDs.find(u->GetGUID())!=m_clientGUIDs.end(); }

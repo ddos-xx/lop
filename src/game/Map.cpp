@@ -2049,7 +2049,7 @@ void Map::UpdatePlayerVisibility( Player* player, Cell cell, CellPair cellpair )
 
 void Map::UpdateObjectsVisibilityFor( Player* player, Cell cell, CellPair cellpair )
 {
-    MaNGOS::VisibleNotifier notifier(*player);
+    MaNGOS::VisibleNotifier notifier(*player, player->m_clientGUIDs);
 
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();

@@ -90,6 +90,7 @@
 #include <algorithm>
 
 #include "LockedQueue.h"
+#include "LockedSet.h"
 #include "Threading.h"
 
 #include <ace/Basic_Types.h>

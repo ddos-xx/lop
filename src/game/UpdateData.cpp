@@ -29,7 +29,7 @@ UpdateData::UpdateData() : m_blockCount(0)
 {
 }
 
-void UpdateData::AddOutOfRangeGUID(std::set<uint64>& guids)
+void UpdateData::AddOutOfRangeGUID(ACE_Based::LockedSet<uint64, ACE_Thread_Mutex>& guids)
 {
     m_outOfRangeGUIDs.insert(guids.begin(),guids.end());
 }

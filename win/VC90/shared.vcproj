@@ -101,7 +101,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|x64"
+			Name="Debug|Win32"
 			OutputDirectory=".\shared__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\shared__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -124,7 +124,6 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -132,8 +131,8 @@
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0"
-				StringPooling="true"
-				RuntimeLibrary="2"
+                StringPooling="true"
+                RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				EnableEnhancedInstructionSet="0"
 				RuntimeTypeInfo="true"
@@ -162,7 +161,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
 				AdditionalLibraryDirectories="dep\lib\$(PlatformName)_$(ConfigurationName)"
 				SuppressStartupBanner="true"
@@ -184,7 +182,7 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Win32"
+			Name="Debug|x64"
 			OutputDirectory=".\shared__$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory=".\shared__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
@@ -244,7 +242,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
-				AdditionalLibraryDirectories="dep\lib\$(PlatformName)_$(ConfigurationName)"
+				AdditionalLibraryDirectories="dep\lib\$(PlatformName)_debug"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -369,6 +367,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -405,8 +404,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
-				AdditionalLibraryDirectories="dep\lib\$(PlatformName)_debug"
+				AdditionalLibraryDirectories="dep\lib\$(PlatformName)_$(ConfigurationName)"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -868,10 +868,36 @@
 			>
 		</File>
 		<File
+	        RelativePath="..\..\src\shared\LockedSet.h"
+            >
+        </File>
+        <File
 			RelativePath="..\..\src\shared\revision.h"
 			>
 			<FileConfiguration
 				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Extract revision"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\genrevision__$(PlatformName)_$(ConfigurationName)\genrevision.exe&quot; &quot;..\..&quot;&#x0D;&#x0A;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD"
+					Outputs="revision.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Extract revision"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\genrevision__$(PlatformName)_$(ConfigurationName)\genrevision.exe&quot; &quot;..\..&quot;&#x0D;&#x0A;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD"
+					Outputs="revision.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug_NoPCH|Win32"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
@@ -893,34 +919,12 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="Extract revision"
-					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\genrevision__$(PlatformName)_$(ConfigurationName)\genrevision.exe&quot; &quot;..\..&quot;&#x0D;&#x0A;"
-					AdditionalDependencies="$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD"
-					Outputs="revision.h"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
 				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract revision"
 					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\genrevision__Win32_$(ConfigurationName)\genrevision.exe&quot; &quot;..\..&quot;&#x0D;&#x0A;"
-					AdditionalDependencies="$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD"
-					Outputs="revision.h"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Debug_NoPCH|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="Extract revision"
-					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\genrevision__$(PlatformName)_$(ConfigurationName)\genrevision.exe&quot; &quot;..\..&quot;&#x0D;&#x0A;"
 					AdditionalDependencies="$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD"
 					Outputs="revision.h"
 				/>
@@ -967,16 +971,6 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|x64"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="Performing Build SystemConfig.h"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h&#x0D;&#x0A;"
-					Outputs="..\..\src\shared\SystemConfig.h"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
 				Name="Debug|Win32"
 				>
 				<Tool
@@ -987,7 +981,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Debug_NoPCH|Win32"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
@@ -997,7 +991,17 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug_NoPCH|Win32"
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h&#x0D;&#x0A;"
+					Outputs="..\..\src\shared\SystemConfig.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCustomBuildTool"

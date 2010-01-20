@@ -18895,13 +18895,13 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
 }
 
 template<class T>
-inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, T* target)
+inline void UpdateVisibilityOf_helper(ACE_Based::LockedSet<uint64, ACE_Thread_Mutex>& s64, T* target)
 {
     s64.insert(target->GetGUID());
 }
 
 template<>
-inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target)
+inline void UpdateVisibilityOf_helper(ACE_Based::LockedSet<uint64, ACE_Thread_Mutex>& s64, GameObject* target)
 {
     if(!target->IsTransport())
         s64.insert(target->GetGUID());

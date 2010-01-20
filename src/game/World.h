@@ -623,7 +623,7 @@ class World
 
                // movement thread
                ACE_Based::LockedQueue<MovementOpcode *, ACE_Thread_Mutex> MovementOpcodeQueue;
-			   static bool movementThread;
+			   bool movementThread;
 
         //used versions
         std::string m_DBVersion;
