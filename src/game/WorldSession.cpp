@@ -164,7 +164,8 @@ void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 /*diff*/)
 {
-       mutex.acquire();
+       ACE_Guard<ACE_Thread_Mutex>(mutex);
+	   
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not proccess packets if socket already closed
     WorldPacket* packet;
@@ -281,7 +282,6 @@ bool WorldSession::Update(uint32 /*diff*/)
     if (!m_Socket || (ShouldLogOut(currTime) && !m_playerLoading))
         LogoutPlayer(true);
 
-       mutex.release();
 
     if (!m_Socket)
         return false;                                       //Will remove this session from the world session map
