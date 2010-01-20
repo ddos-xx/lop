@@ -91,6 +91,7 @@ template<class VISITOR, class H, class T> void VisitorHelper(VISITOR &v, Contain
 // for TypeMapContainer
 template<class VISITOR, class OBJECT_TYPES> void VisitorHelper(VISITOR &v, TypeMapContainer<OBJECT_TYPES> &c)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> lock(c.TypeMapContainerLock);
     VisitorHelper(v, c.GetElements());
 }
 

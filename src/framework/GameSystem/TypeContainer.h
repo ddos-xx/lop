@@ -30,6 +30,7 @@
 #include "Utilities/TypeList.h"
 #include "Utilities/UnorderedMap.h"
 #include "GameSystem/GridRefManager.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 template<class OBJECT, class KEY_TYPE> struct ContainerUnorderedMap
 {
@@ -204,16 +205,17 @@ template<class OBJECT_TYPES>
 class MANGOS_DLL_DECL TypeMapContainer
 {
     public:
-        template<class SPECIFIC_TYPE> size_t Count() const { return MaNGOS::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
+        template<class SPECIFIC_TYPE> size_t Count() const { ACE_Guard<ACE_Recursive_Thread_Mutex> lock(TypeMapContainerLock); return MaNGOS::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
-        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) { return MaNGOS::Find(i_elements, hdl,fake); }
+        template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) { ACE_Guard<ACE_Recursive_Thread_Mutex> lock(TypeMapContainerLock); return MaNGOS::Find(i_elements, hdl,fake); }
 
         /// find a specific type of object in the container
-        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) const { return MaNGOS::Find(i_elements, hdl,fake); }
+        template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) const { ACE_Guard<ACE_Recursive_Thread_Mutex> lock(TypeMapContainerLock); return MaNGOS::Find(i_elements, hdl,fake); }
 
         /// inserts a specific object into the container
         template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj)
         {
+		ACE_Guard<ACE_Recursive_Thread_Mutex> lock(TypeMapContainerLock);
             SPECIFIC_TYPE* t = MaNGOS::Insert(i_elements, obj, hdl);
             return (t != NULL);
         }
@@ -221,12 +223,15 @@ class MANGOS_DLL_DECL TypeMapContainer
         ///  Removes the object from the container, and returns the removed object
         template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj, OBJECT_HANDLE hdl)
         {
+		ACE_Guard<ACE_Recursive_Thread_Mutex> lock(TypeMapContainerLock);
             SPECIFIC_TYPE* t = MaNGOS::Remove(i_elements, obj, hdl);
             return (t != NULL);
         }
 
         ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }
         const ContainerMapList<OBJECT_TYPES> & GetElements(void) const { return i_elements;}
+    
+	mutable ACE_Recursive_Thread_Mutex TypeMapContainerLock;
 
     private:
         ContainerMapList<OBJECT_TYPES> i_elements;
