@@ -2899,7 +2899,14 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
         {
             //Shattering Throw
             if(spell->Id == 64382)
-                pVictim->RemoveAurasAtMechanicImmunity(MECHANIC_IMMUNE_SHIELD-1, 0);
+            {
+                // remove immunity effects
+                pVictim->RemoveAurasDueToSpell(642); // Divine Shield
+                pVictim->RemoveAurasDueToSpell(1022); // Hand of Protection rank 1
+                pVictim->RemoveAurasDueToSpell(5599); // Hand of Protection rank 2
+                pVictim->RemoveAurasDueToSpell(10278); // Hand of Protection rank 3
+                pVictim->RemoveAurasDueToSpell(45438); // Ice Block
+            }
             //Deep Freeze dmg if immune to stun
             else if(spell->Id == 44572)
                 CastSpell(pVictim, 71757, true);
@@ -5797,7 +5804,11 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 // Vampiric Embrace
                 case 15286:
                 {
-                    // heal amount
+                    // Return if self damage
+                    if (this == pVictim)
+                        return false;
+
+                    // Heal amount - Self/Team
                     int32 team = triggerAmount*damage/500;
                     int32 self = triggerAmount*damage/100 - team;
                     CastCustomSpell(this,15290,&team,&self,NULL,true,castItem,triggeredByAura);
@@ -13707,10 +13718,14 @@ bool Unit::isIgnoreUnitState(SpellEntry const *spell)
         if(spell->Id == 11170 || spell->Id == 12982 || spell->Id == 12983)
             return true;
     }
-    Unit::AuraList const& stateAuras = GetAurasByType(SPELL_AURA_SCHOOL_IMMUNITY);
+    Unit::AuraList const& stateAuras = GetAurasByType(SPELL_AURA_IGNORE_UNIT_STATE);
     for(Unit::AuraList::const_iterator j = stateAuras.begin();j != stateAuras.end(); ++j)
     {
-        
+        if((*j)->isAffectedOnSpell(spell))
+        {
+            return true;
+            break;
+        }
     }
     return false;
 }
