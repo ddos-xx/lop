@@ -323,6 +323,8 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     case 42384:                             // Brutal Swipe
                     case 45150:                             // Meteor Slash
                     case 64422: case 64688:                 // Sonic Screech
+                    case 70492: case 72505:                 // Ooze Eruption
+                    case 72624: case 72625:                 // Ooze Eruption
                     {
                         uint32 count = 0;
                         for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
@@ -394,7 +396,8 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 // Heroic Throw ${$m1+$AP*.50}
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000100000000))
                     damage+= uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
-					else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0040000000000000))
+                // Shattering Throw ${$m1+$AP*.50}
+                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0040000000000000))
                     damage+= uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
                 // Shockwave ${$m3/100*$AP}
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000800000000000))
@@ -1981,37 +1984,6 @@ void Spell::EffectDummy(uint32 i)
                            return;
                         }
                     }
-                }
-                return;
-            }
-            // Fire Nova
-            if (m_spellInfo->SpellIconID == 33)
-            {
-                if (!m_caster)
-                    return;
-
-                uint32 triggered_spell_id;
-                switch(m_spellInfo->Id)
-                {
-                    case 1535:  triggered_spell_id = 8349; break;
-                    case 8498:  triggered_spell_id = 8502; break;
-                    case 8499:  triggered_spell_id = 8503; break;
-                    case 11314: triggered_spell_id = 11306; break;
-                    case 11315: triggered_spell_id = 11307; break;
-                    case 25546: triggered_spell_id = 25535; break;
-                    case 25547: triggered_spell_id = 25537; break;
-                    case 61649: triggered_spell_id = 61650; break;
-                    case 61657: triggered_spell_id = 61654; break;
-                    default:
-                        break;
-                }
-                // fire slot
-                if (triggered_spell_id && m_caster->m_TotemSlot[0])
-                {
-                    Creature* totem = m_caster->GetMap()->GetCreature(m_caster->m_TotemSlot[0]);
-                    if (totem && totem->isTotem())
-                        totem->CastSpell(totem, triggered_spell_id, true);
-                    return;
                 }
                 return;
             }
