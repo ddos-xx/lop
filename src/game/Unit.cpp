@@ -35,6 +35,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
+#include "TemporarySummon.h"
 #include "Formulas.h"
 #include "Pet.h"
 #include "Util.h"
@@ -715,6 +716,16 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             // Call creature just died function
             if (cVictim->AI())
                 cVictim->AI()->JustDied(this);
+
+            if (cVictim->isTemporarySummon())
+            {
+                TemporarySummon* pSummon = (TemporarySummon*)cVictim;
+                if (IS_CREATURE_GUID(pSummon->GetSummonerGUID()))
+                    if(Creature* pSummoner = cVictim->GetMap()->GetCreature(pSummon->GetSummonerGUID()))
+                        if (pSummoner->AI())
+                            pSummoner->AI()->SummonedCreatureJustDied(cVictim);
+            }
+
 
             // Dungeon specific stuff, only applies to players killing creatures
             if(cVictim->GetInstanceId())
@@ -2563,7 +2574,73 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
-bool Unit::isSpellBlocked(Unit *pVictim, SpellEntry const *spellProto, WeaponAttackType attackType)
+void Unit::SendInitialVisiblePacketsFor(Player *player)
+{
+    SendAurasFor(player);
+    if(isAlive())
+    {
+        if(GetTypeId() == TYPEID_UNIT)
+            ((Creature*)this)->SendMonsterMoveWithSpeedToCurrentDestination(player);
+
+        if(hasUnitState(UNIT_STAT_MELEE_ATTACKING) && getVictim())
+            SendMeleeAttackStart(getVictim());
+    }
+}
+
+void Unit::SendAurasFor(Player *player)
+{
+    if(GetVisibleAuras()->empty())                  // speedup things
+        return;
+
+    WorldPacket data(SMSG_AURA_UPDATE_ALL);
+    data.append(GetPackGUID());
+
+    Unit::VisibleAuraMap const *visibleAuras = GetVisibleAuras();
+    for(Unit::VisibleAuraMap::const_iterator itr = visibleAuras->begin(); itr != visibleAuras->end(); ++itr)
+    {
+        for(uint32 j = 0; j < 3; ++j)
+        {
+            if(Aura *aura = GetAura(itr->second, j))
+            {
+                data << uint8(aura->GetAuraSlot());
+                data << uint32(aura->GetId());
+
+                if(aura->GetId())
+                {
+                    uint8 auraFlags = aura->GetAuraFlags();
+                    // flags
+                    data << uint8(auraFlags);
+                    // level
+                    data << uint8(aura->GetAuraLevel());
+                    // charges
+                    if (aura->GetAuraCharges())
+                        data << uint8(aura->GetAuraCharges() * aura->GetStackAmount());
+                    else
+                        data << uint8(aura->GetStackAmount());
+
+                    if(!(auraFlags & AFLAG_NOT_CASTER))
+                    {
+                        if (Unit* m_caster = aura->GetCaster())
+                            data.append(m_caster->GetPackGUID());
+                        else
+                            data << uint8(0);                                   // pguid
+                    }
+
+                    if(auraFlags & AFLAG_DURATION)          // include aura duration
+                    {
+                        data << uint32(aura->GetAuraMaxDuration());
+                        data << uint32(aura->GetAuraDuration());
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    player->GetSession()->SendPacket(&data);
+}
+
+bool Unit::isSpellBlocked(Unit *pVictim, SpellEntry const * spellProto, WeaponAttackType attackType)
 {
     // Some spell can not be blocked
     if (spellProto && spellProto->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
@@ -2907,9 +2984,6 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
                 pVictim->RemoveAurasDueToSpell(10278); // Hand of Protection rank 3
                 pVictim->RemoveAurasDueToSpell(45438); // Ice Block
             }
-            //Deep Freeze dmg if immune to stun
-            else if(spell->Id == 44572)
-                CastSpell(pVictim, 71757, true);
             else
                 return SPELL_MISS_IMMUNE;
         }
@@ -10638,12 +10712,12 @@ void Unit::SetVisibility(UnitVisibility x)
 
     if(IsInWorld())
     {
-        Map *m = GetMap();
-
-        if(GetTypeId()==TYPEID_PLAYER)
-            m->PlayerRelocation((Player*)this,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+        if(GetTypeId() == TYPEID_PLAYER)
+            GetMap()->AddNotifier((Player*)this, false);
         else
-            m->CreatureRelocation((Creature*)this,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+            GetMap()->AddNotifier((Creature*)this, false);
+
+        AddToNotify(NOTIFY_VISIBILITY_CHANGED);
     }
 }
 
