@@ -1055,8 +1055,6 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
         CreatureRelocationNotify(creature,new_cell,new_val);
         if(creature->isCharmed())
         {
-            UpdatePlayerVisibility(creature->GetCharmerOrOwnerPlayerOrPlayerItself(),new_cell,new_val);
-            UpdateObjectsVisibilityFor(creature->GetCharmerOrOwnerPlayerOrPlayerItself(),new_cell,new_val);
             PlayerRelocationNotify(creature->GetCharmerOrOwnerPlayerOrPlayerItself(),new_cell,new_val);
 
             bool same_cell = (new_cell == old_cell);

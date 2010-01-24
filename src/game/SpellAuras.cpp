@@ -666,7 +666,7 @@ void Aura::Update(uint32 diff)
         if(m_periodicTimer <= 0) // tick also at m_periodicTimer==0 to prevent lost last tick in case max m_duration == (max m_periodicTimer)*N
         {
             // update before applying (aura can be removed in TriggerSpell or PeriodicTick calls)
-            if(if(GetSpellProto()->AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2)))
+            if((GetSpellProto()->AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2)))
                 m_periodicTimer += GetChannelPeriodic();
             else
                 m_periodicTimer += m_modifier.periodictime;
@@ -8299,7 +8299,9 @@ int32 Aura::GetChannelPeriodic()
 
     if(!GetCaster())
         return periodic;
-
+    
+	SpellEntry const *spellInfo = GetSpellProto();
+	
     if( !(spellInfo->Attributes & (SPELL_ATTR_UNK4|SPELL_ATTR_TRADESPELL)) )
         duration = int32(m_maxduration * GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
