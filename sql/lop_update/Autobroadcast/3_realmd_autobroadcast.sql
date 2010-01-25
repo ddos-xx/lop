@@ -3,4 +3,4 @@ CREATE TABLE IF NOT EXISTS `autobroadcast` (
   `text` longtext NOT NULL,
   `next` int(11) NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
